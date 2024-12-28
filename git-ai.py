@@ -26,17 +26,24 @@ def save_to_zshrc(variable_name, value):
         file.write(f'\nexport {variable_name}="{value}"\n')
     print(f"{variable_name} saved to ~/.zshrc. Run `source ~/.zshrc` to apply changes.")
 
-# Load OpenAI API Key and Model from zshrc
+def update_api_key():
+    """
+    Prompt the user for a new API key and save it to ~/.zshrc.
+    """
+    global api_key
+    api_key = input("Enter a valid GroqAI API key: ").strip()
+    save_to_zshrc("OPENAI_API_KEY", api_key)
+    print("API key updated. Please run `source ~/.zshrc` to apply changes.")
+
+# Load GroqAI API Key and Model from zshrc
 api_key = get_from_zshrc("OPENAI_API_KEY")
 if not api_key:
-    api_key = input("OpenAI API key not found. Please enter your API key: ").strip()
-    save_to_zshrc("OPENAI_API_KEY", api_key)
-    print("API key saved to ~/.zshrc. Please run `source ~/.zshrc` to apply.")
+    update_api_key()
 
-model = get_from_zshrc("OPENAI_MODEL") or "gpt-4"
+model = get_from_zshrc("OPENAI_MODEL") or "llama3-70b-8192"
 
-# Initialize OpenAI client
-client = OpenAI(api_key=api_key)
+# Initialize GroqAI client
+client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=api_key)
 
 def save_model_choice(new_model):
     """
@@ -47,7 +54,7 @@ def save_model_choice(new_model):
 
 def list_available_models():
     """
-    List all available OpenAI models.
+    List all available GroqAI models.
     """
     try:
         response = client.models.list()
@@ -55,8 +62,14 @@ def list_available_models():
         for model_info in response.data:
             print(f"- {model_info.id}")
     except Exception as e:
-        print("Error fetching available models:", e)
-        sys.exit(1)
+        if "invalid_api_key" in str(e).lower():
+            print("Invalid API key. Please provide a valid key.")
+            update_api_key()
+            # Retry listing models after updating the API key
+            list_available_models()
+        else:
+            print(f"Error fetching available models: {e}")
+            sys.exit(1)
 
 def stage_changes():
     """
@@ -85,8 +98,12 @@ def get_git_diff():
 
 def generate_commit_message(diff):
     """
-    Use OpenAI API to generate a commit message based on the diff summary.
+    Use GroqAI API to generate a commit message based on the diff summary.
+    Handles `model_not_found` error by prompting the user to select another model dynamically.
     """
+    # Fetch the current model dynamically
+    current_model = get_from_zshrc("OPENAI_MODEL") or "llama3-70b-8192"
+    
     prompt = f"""
     Generate a concise and professional Git commit message for the following changes:
     
@@ -94,7 +111,7 @@ def generate_commit_message(diff):
     """
     try:
         response = client.chat.completions.create(
-            model=model,
+            model=current_model,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant for generating Git commit messages."},
                 {"role": "user", "content": prompt}
@@ -103,8 +120,40 @@ def generate_commit_message(diff):
         commit_message = response.choices[0].message.content.strip()
         return commit_message
     except Exception as e:
-        print("Error generating commit message:", e)
-        sys.exit(1)
+        error_message = str(e).lower()
+        
+        if "model_not_found" in error_message:
+            print(f"Error: The model '{current_model}' does not exist or you do not have access to it.")
+            print("Fetching available models...")
+            
+            try:
+                # List available models and prompt user to choose
+                response = client.models.list()
+                print("Available models:")
+                available_models = [model_info.id for model_info in response.data]
+                for idx, model_name in enumerate(available_models, start=1):
+                    print(f"{idx}. {model_name}")
+                
+                # Prompt user for new model selection
+                choice = int(input("Enter the number of the model you want to use: ")) - 1
+                if choice < 0 or choice >= len(available_models):
+                    raise ValueError("Invalid choice. Please select a valid model number.")
+                
+                # Update model and save to ~/.zshrc
+                new_model = available_models[choice]
+                save_model_choice(new_model)
+                
+                # Retry generating the commit message with the new model
+                print(f"Switching to model '{new_model}' and retrying...")
+                return generate_commit_message(diff)
+            
+            except Exception as model_error:
+                print(f"Error fetching models or updating model: {model_error}")
+                sys.exit(1)
+        
+        else:
+            print(f"Error generating commit message: {e}")
+            sys.exit(1)
 
 def apply_commit(commit_message):
     """
@@ -136,13 +185,16 @@ def main():
     """
     Main function to run the CLI tool.
     """
-    parser = argparse.ArgumentParser(description="Auto-generate Git commit messages using OpenAI GPT.")
+    parser = argparse.ArgumentParser(description="Auto-generate Git commit messages using GroqAI.")
     
     # Add argument to list available models
-    parser.add_argument("-l", "--list-models", action="store_true", help="List all available OpenAI models.")
+    parser.add_argument("-l", "--list-models", action="store_true", help="List all available GroqAI models.")
     
     # Add argument to set the model
     parser.add_argument("-s", "--set-model", type=str, help="Set the model to use for generating commit messages.")
+    
+    # Add argument to set a new API key
+    parser.add_argument("-k", "--set-key", action="store_true", help="Set a new GroqAI API key.")
     
     # Parse arguments
     args = parser.parse_args()
@@ -153,6 +205,10 @@ def main():
 
     if args.set_model:
         save_model_choice(args.set_model)
+        sys.exit(0)
+
+    if args.set_key:
+        update_api_key()
         sys.exit(0)
 
     # Automatically stage all changes
