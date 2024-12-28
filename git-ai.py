@@ -37,7 +37,7 @@ def list_available_models():
         response = client.models.list()
         print("Available models:")
         for model in response.data:
-            print(f"- {model['id']}")
+            print(f"- {model.id}")
     except Exception as e:
         print("Error fetching available models:", e)
         sys.exit(1)
