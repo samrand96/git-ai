@@ -105,16 +105,17 @@ def push_changes():
     """
     Push the committed changes to the remote repository.
     """
-    confirm = input("\nDo you want to push the changes to the remote repository? [y/N]: ").strip().lower()
-    if confirm == 'y':
+    confirm = input("\nDo you want to push the changes to the remote repository? [Y/n]: ").strip().lower()
+    if confirm == 'n':
+        print("Push aborted.")
+    else:
         try:
             subprocess.run(["git", "push"], check=True)
             print("Changes successfully pushed to the remote repository!")
         except subprocess.CalledProcessError as e:
             print("Error pushing changes:", e)
             sys.exit(1)
-    else:
-        print("Push aborted.")
+        
 
 def main():
     """
