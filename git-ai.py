@@ -1,33 +1,49 @@
 import os
 import subprocess
 from openai import OpenAI
-from dotenv import load_dotenv
 import argparse
 import sys
 
-# Load .env file if it exists
-load_dotenv()
+ZSHRC_PATH = os.path.expanduser("~/.zshrc")
 
-# Initialize OpenAI client
-api_key = os.getenv("OPENAI_API_KEY")
+def get_from_zshrc(variable_name):
+    """
+    Retrieve a variable value from ~/.zshrc.
+    """
+    if not os.path.exists(ZSHRC_PATH):
+        return None
+    with open(ZSHRC_PATH, "r") as file:
+        for line in file:
+            if line.startswith(f"export {variable_name}="):
+                return line.split("=", 1)[1].strip().strip('"')
+    return None
+
+def save_to_zshrc(variable_name, value):
+    """
+    Save a variable to ~/.zshrc.
+    """
+    with open(ZSHRC_PATH, "a") as file:
+        file.write(f'\nexport {variable_name}="{value}"\n')
+    print(f"{variable_name} saved to ~/.zshrc. Run `source ~/.zshrc` to apply changes.")
+
+# Load OpenAI API Key and Model from zshrc
+api_key = get_from_zshrc("OPENAI_API_KEY")
 if not api_key:
     api_key = input("OpenAI API key not found. Please enter your API key: ").strip()
-    with open(".env", "a") as env_file:
-        env_file.write(f"\nOPENAI_API_KEY={api_key}")
-    print("API key saved in .env file.")
+    save_to_zshrc("OPENAI_API_KEY", api_key)
+    print("API key saved to ~/.zshrc. Please run `source ~/.zshrc` to apply.")
 
+model = get_from_zshrc("OPENAI_MODEL") or "gpt-4"
+
+# Initialize OpenAI client
 client = OpenAI(api_key=api_key)
-
-# Get the model to use (default to gpt-4)
-model = os.getenv("OPENAI_MODEL", "gpt-4")
 
 def save_model_choice(new_model):
     """
-    Save the selected model in the .env file.
+    Save the selected model to ~/.zshrc.
     """
-    with open(".env", "a") as env_file:
-        env_file.write(f"\nOPENAI_MODEL={new_model}")
-    print(f"Model '{new_model}' saved in .env file.")
+    save_to_zshrc("OPENAI_MODEL", new_model)
+    print(f"Model '{new_model}' saved to ~/.zshrc.")
 
 def list_available_models():
     """
@@ -36,8 +52,8 @@ def list_available_models():
     try:
         response = client.models.list()
         print("Available models:")
-        for model in response.data:
-            print(f"- {model.id}")
+        for model_info in response.data:
+            print(f"- {model_info.id}")
     except Exception as e:
         print("Error fetching available models:", e)
         sys.exit(1)
@@ -115,15 +131,20 @@ def push_changes():
         except subprocess.CalledProcessError as e:
             print("Error pushing changes:", e)
             sys.exit(1)
-        
 
 def main():
     """
     Main function to run the CLI tool.
     """
     parser = argparse.ArgumentParser(description="Auto-generate Git commit messages using OpenAI GPT.")
-    parser.add_argument("--list-models", action="store_true", help="List all available OpenAI models.")
-    parser.add_argument("--set-model", type=str, help="Set the model to use for generating commit messages.")
+    
+    # Add argument to list available models
+    parser.add_argument("-l", "--list-models", action="store_true", help="List all available OpenAI models.")
+    
+    # Add argument to set the model
+    parser.add_argument("-s", "--set-model", type=str, help="Set the model to use for generating commit messages.")
+    
+    # Parse arguments
     args = parser.parse_args()
 
     if args.list_models:
