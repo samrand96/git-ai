@@ -1,17 +1,19 @@
 import os
 import subprocess
-import openai
-import argparse
+from openai import OpenAI
 from dotenv import load_dotenv
-
-# Load .env file if it exists
+import argparse
 load_dotenv()
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
+
 # Get the OpenAI API key from environment or .env
-openai.api_key = os.getenv("OPENAI_API_KEY")
-if not openai.api_key:
+if not client.api_key:
     print("Error: OpenAI API key not found. Set OPENAI_API_KEY in your environment or a .env file.")
     exit(1)
+
 
 def get_git_diff():
     """
@@ -21,11 +23,11 @@ def get_git_diff():
         diff = subprocess.check_output(["git", "diff", "--staged"], text=True)
         if not diff.strip():
             print("No staged changes to generate a commit message for.")
-            exit(0)
+            sys.exit(0)
         return diff
     except subprocess.CalledProcessError as e:
         print("Error fetching git diff:", e)
-        exit(1)
+        sys.exit(1)
 
 def generate_commit_message(diff):
     """
@@ -37,13 +39,12 @@ def generate_commit_message(diff):
     {diff}
     """
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-        )
-        commit_message = response['choices'][0]['message']['content'].strip()
+        response = client.chat.completions.create(model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant for generating Git commit messages."},
+            {"role": "user", "content": prompt}
+        ])
+        commit_message = response.choices[0].message.content.strip()
         return commit_message
     except Exception as e:
         print("Error generating commit message:", e)
