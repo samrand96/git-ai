@@ -2,18 +2,45 @@ import os
 import subprocess
 from openai import OpenAI
 from dotenv import load_dotenv
+import argparse
 import sys
 
 # Load .env file if it exists
 load_dotenv()
 
 # Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    api_key = input("OpenAI API key not found. Please enter your API key: ").strip()
+    with open(".env", "a") as env_file:
+        env_file.write(f"\nOPENAI_API_KEY={api_key}")
+    print("API key saved in .env file.")
 
-# Check if the OpenAI API key is set
-if not client.api_key:
-    print("Error: OpenAI API key not found. Set OPENAI_API_KEY in your environment or a .env file.")
-    sys.exit(1)
+client = OpenAI(api_key=api_key)
+
+# Get the model to use (default to gpt-4)
+model = os.getenv("OPENAI_MODEL", "gpt-4")
+
+def save_model_choice(new_model):
+    """
+    Save the selected model in the .env file.
+    """
+    with open(".env", "a") as env_file:
+        env_file.write(f"\nOPENAI_MODEL={new_model}")
+    print(f"Model '{new_model}' saved in .env file.")
+
+def list_available_models():
+    """
+    List all available OpenAI models.
+    """
+    try:
+        response = client.models.list()
+        print("Available models:")
+        for model in response.data:
+            print(f"- {model['id']}")
+    except Exception as e:
+        print("Error fetching available models:", e)
+        sys.exit(1)
 
 def stage_changes():
     """
@@ -51,7 +78,7 @@ def generate_commit_message(diff):
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model=model,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant for generating Git commit messages."},
                 {"role": "user", "content": prompt}
@@ -93,6 +120,19 @@ def main():
     """
     Main function to run the CLI tool.
     """
+    parser = argparse.ArgumentParser(description="Auto-generate Git commit messages using OpenAI GPT.")
+    parser.add_argument("--list-models", action="store_true", help="List all available OpenAI models.")
+    parser.add_argument("--set-model", type=str, help="Set the model to use for generating commit messages.")
+    args = parser.parse_args()
+
+    if args.list_models:
+        list_available_models()
+        sys.exit(0)
+
+    if args.set_model:
+        save_model_choice(args.set_model)
+        sys.exit(0)
+
     # Automatically stage all changes
     stage_changes()
 
