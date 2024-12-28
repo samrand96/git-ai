@@ -1,153 +1,187 @@
-Git-AI: Auto-Generate Git Commit Messages with AI
+# Git-AI: Auto-Generate Git Commit Messages with AI
 
-Git-AI is a Python-based CLI tool that leverages OpenAI’s GPT models to generate professional and concise Git commit messages based on staged changes. It saves developers time and ensures clear, meaningful commit messages.
+**Git-AI** is a Python-based CLI tool that leverages OpenAI's GPT models to generate professional and concise Git commit messages based on staged changes. It saves developers time and ensures clear, meaningful commit messages.
 
-Features
-	•	Analyze Staged Changes: Automatically reads your staged changes (git diff --staged) to understand what has been modified.
-	•	AI-Generated Commit Messages: Generates contextually appropriate commit messages using OpenAI’s GPT models.
-	•	Customizable Output: View the suggested commit message or directly apply it.
-	•	Cross-Platform: Works seamlessly on macOS, Linux, and Windows.
+---
 
-Requirements
-	•	Python 3.7 or higher
-	•	Git installed and configured
-	•	OpenAI API key
+## Features
 
-Installation
-	1.	Clone the repository:
+- **Analyze Staged Changes**: Automatically reads your staged changes (`git diff --staged`) to understand what has been modified.
+- **AI-Generated Commit Messages**: Generates contextually appropriate commit messages using OpenAI's GPT models.
+- **Customizable Output**: View the suggested commit message or directly apply it.
+- **Cross-Platform**: Works seamlessly on macOS, Linux, and Windows.
 
-git clone https://github.com/your-username/git-ai.git
-cd git-ai
+---
 
+## Requirements
 
-	2.	Install dependencies:
+- Python 3.7 or higher
+- Git installed and configured
+- OpenAI API key
 
-pip install -r requirements.txt
+---
 
+## Installation
 
-	3.	Set up your OpenAI API key:
-	•	Create a .env file in the project directory:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/git-ai.git
+   cd git-ai
+   ```
 
-OPENAI_API_KEY=your_openai_api_key
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Usage
+3. Set up your OpenAI API key:
+   - Create a `.env` file in the project directory:
+     ```
+     OPENAI_API_KEY=your_openai_api_key
+     ```
 
-Generate a Commit Message
-	1.	Stage your changes in Git:
+---
 
-git add .
+## Usage
 
+### Generate a Commit Message
+1. Stage your changes in Git:
+   ```bash
+   git add .
+   ```
 
-	2.	Run Git-AI to generate a commit message:
+2. Run Git-AI to generate a commit message:
+   ```bash
+   python git-ai.py
+   ```
 
-python git-ai.py
+   Example output:
+   ```
+   Suggested commit message:
+   - Fix null pointer exception in user authentication
+   - Update README with installation steps
+   ```
 
-Example output:
+3. Use the message manually, or proceed with the following step to commit automatically.
 
-Suggested commit message:
-- Fix null pointer exception in user authentication
-- Update README with installation steps
-
-
-	3.	Use the message manually, or proceed with the following step to commit automatically.
-
-Automatically Commit
-
-Run Git-AI with the --commit flag to generate and apply the commit message:
-
+### Automatically Commit
+Run Git-AI with the `--commit` flag to generate and apply the commit message:
+```bash
 python git-ai.py --commit
+```
 
 You will be prompted to confirm the commit message before applying it.
 
-How It Works
-	1.	Git Integration:
-	•	Fetches staged changes using git diff --staged.
-	2.	AI-Powered Suggestions:
-	•	Sends the diff summary to OpenAI’s GPT model to generate a professional commit message.
-	3.	Command-Line Interface:
-	•	Offers options to preview or directly apply the generated commit message.
+---
 
-Creating a Binary (macOS)
-	1.	Install PyInstaller:
+## How It Works
 
-pip install pyinstaller
+1. **Git Integration**:
+   - Fetches staged changes using `git diff --staged`.
 
+2. **AI-Powered Suggestions**:
+   - Sends the diff summary to OpenAI's GPT model to generate a professional commit message.
 
-	2.	Build the executable:
+3. **Command-Line Interface**:
+   - Offers options to preview or directly apply the generated commit message.
 
-pyinstaller --onefile git-ai.py
+---
 
+## Creating a Binary (macOS)
 
-	3.	The executable will be located in the dist/ directory. Move it to your system path for global usage:
+1. Install **PyInstaller**:
+   ```bash
+   pip install pyinstaller
+   ```
 
-mv dist/git-ai /usr/local/bin/git-ai
-chmod +x /usr/local/bin/git-ai
+2. Build the executable:
+   ```bash
+   pyinstaller --onefile git-ai.py
+   ```
 
+3. The executable will be located in the `dist/` directory. Move it to your system path for global usage:
+   ```bash
+   mv dist/git-ai /usr/local/bin/git-ai
+   chmod +x /usr/local/bin/git-ai
+   ```
 
-	4.	Run the tool globally:
+4. Run the tool globally:
+   ```bash
+   git-ai --commit
+   ```
 
-git-ai --commit
+---
 
-Examples
+## Examples
 
-Suggested Commit Message
-
+### Suggested Commit Message
+```bash
 python git-ai.py
+```
 
 Output:
-
+```
 Suggested commit message:
 - Update user authentication logic
 - Fix typo in error message
+```
 
-Auto-Commit
-
+### Auto-Commit
+```bash
 python git-ai.py --commit
+```
 
 Output:
-
+```
 Generating commit message...
 Suggested commit message:
 - Refactor database connection logic
 
 Do you want to use this commit message? [y/N]: y
 Commit successfully applied!
+```
 
-Configuration
+---
 
-Environment Variables
+## Configuration
 
-The script reads the OpenAI API key from the .env file or environment variables. Ensure the variable is set:
-
+### Environment Variables
+The script reads the OpenAI API key from the `.env` file or environment variables. Ensure the variable is set:
+```bash
 export OPENAI_API_KEY=your_openai_api_key
+```
 
-Contribution
+---
+
+## Contribution
 
 Contributions are welcome! To contribute:
-	1.	Fork the repository.
-	2.	Create a feature branch:
+1. Fork the repository.
+2. Create a feature branch:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Commit your changes:
+   ```bash
+   git commit -m "Add new feature"
+   ```
+4. Push the branch:
+   ```bash
+   git push origin feature-name
+   ```
+5. Open a pull request.
 
-git checkout -b feature-name
+---
 
+## License
 
-	3.	Commit your changes:
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
-git commit -m "Add new feature"
+---
 
+## Acknowledgments
 
-	4.	Push the branch:
+- OpenAI for their GPT API
+- Python community for libraries like `dotenv`, `argparse`, and `subprocess`
 
-git push origin feature-name
-
-
-	5.	Open a pull request.
-
-License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-Acknowledgments
-	•	OpenAI for their GPT API
-	•	Python community for libraries like dotenv, argparse, and subprocess
-
-Enjoy using Git-AI! 🚀
+Enjoy using **Git-AI**! 🚀

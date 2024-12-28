@@ -2,18 +2,29 @@ import os
 import subprocess
 from openai import OpenAI
 from dotenv import load_dotenv
-import argparse
+import sys
+
+# Load .env file if it exists
 load_dotenv()
 
+# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-
-
-# Get the OpenAI API key from environment or .env
+# Check if the OpenAI API key is set
 if not client.api_key:
     print("Error: OpenAI API key not found. Set OPENAI_API_KEY in your environment or a .env file.")
-    exit(1)
+    sys.exit(1)
 
+def stage_changes():
+    """
+    Stage all changes in the Git repository.
+    """
+    try:
+        subprocess.run(["git", "add", "."], check=True)
+        print("All changes have been staged.")
+    except subprocess.CalledProcessError as e:
+        print("Error staging changes:", e)
+        sys.exit(1)
 
 def get_git_diff():
     """
@@ -39,16 +50,18 @@ def generate_commit_message(diff):
     {diff}
     """
     try:
-        response = client.chat.completions.create(model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant for generating Git commit messages."},
-            {"role": "user", "content": prompt}
-        ])
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant for generating Git commit messages."},
+                {"role": "user", "content": prompt}
+            ]
+        )
         commit_message = response.choices[0].message.content.strip()
         return commit_message
     except Exception as e:
         print("Error generating commit message:", e)
-        exit(1)
+        sys.exit(1)
 
 def apply_commit(commit_message):
     """
@@ -59,15 +72,29 @@ def apply_commit(commit_message):
         print("Commit successfully applied!")
     except subprocess.CalledProcessError as e:
         print("Error applying commit:", e)
-        exit(1)
+        sys.exit(1)
+
+def push_changes():
+    """
+    Push the committed changes to the remote repository.
+    """
+    confirm = input("\nDo you want to push the changes to the remote repository? [y/N]: ").strip().lower()
+    if confirm == 'y':
+        try:
+            subprocess.run(["git", "push"], check=True)
+            print("Changes successfully pushed to the remote repository!")
+        except subprocess.CalledProcessError as e:
+            print("Error pushing changes:", e)
+            sys.exit(1)
+    else:
+        print("Push aborted.")
 
 def main():
     """
     Main function to run the CLI tool.
     """
-    parser = argparse.ArgumentParser(description="Auto-generate Git commit messages using OpenAI GPT.")
-    parser.add_argument("--commit", action="store_true", help="Automatically commit with the generated message.")
-    args = parser.parse_args()
+    # Automatically stage all changes
+    stage_changes()
 
     # Get the git diff
     diff = get_git_diff()
@@ -78,15 +105,11 @@ def main():
     print("\nSuggested commit message:\n")
     print(commit_message)
 
-    # Apply the commit if requested
-    if args.commit:
-        confirm = input("\nDo you want to use this commit message? [y/N]: ").strip().lower()
-        if confirm == 'y':
-            apply_commit(commit_message)
-        else:
-            print("Commit aborted.")
-    else:
-        print("\nUse the --commit flag to automatically commit with this message.")
+    # Automatically apply the commit
+    apply_commit(commit_message)
+
+    # Ask the user if they want to push the changes
+    push_changes()
 
 if __name__ == "__main__":
     main()
