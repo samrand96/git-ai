@@ -16,7 +16,8 @@ Git-AI transforms your staged changes into clear, human-sounding Git commit mess
    * [Changing Format](#changing-format)
    * [Editing Configuration](#editing-configuration)
 5. [Advanced: Standalone Binary](#advanced-standalone-binary)
-6. [License](#license)
+6. [To-Do / Future Plans](#to-do--future-plans)
+7. [License](#license)
 
 ---
 
@@ -163,6 +164,22 @@ If you’d rather run `git-ai` without Python installed at runtime:
    ```bash
    git-ai
    ```
+
+---
+
+## To-Do / Future Plans
+
+- [ ] Support for Conventional Commits: automatically enforce and generate messages in the `type(scope): description` format (feat, fix, docs, etc.).
+- [ ] Pre-commit and commit-msg hooks: integrate Git hooks to validate or reformat the AI-generated commit before it’s saved.
+- [ ] Issue tracker integration: detect and link JIRA, GitHub, or GitLab issue IDs to commits, and fetch issue titles for context.
+- [ ] Automated semantic version tagging: analyze commit types and suggest or apply version bumps (major, minor, patch) and tag accordingly.
+- [ ] Changelog automation: aggregate and format commit messages into a CHANGELOG.md, grouped by version and type.
+- [ ] Custom branch naming rules: allow teams to define and validate branch patterns for consistent ticket prefixes.
+- [ ] Offline/fallback mode: cache recent commit templates or model outputs so basic messages can be generated without internet.
+- [ ] Performance profiling and optimization: track and reduce latency for commit generation in large repositories.
+- [ ] AI security check-up: scan generated commit text for potential secrets, PII, or insecure patterns before committing.
+- [ ] Template configuration: allow users to define custom commit templates with optional footers, co-author tags, or emojis.
+- [ ] Multi-language support: enable commit messages in different languages based on project locale or user preference.
 
 ---
 
