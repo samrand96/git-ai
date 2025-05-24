@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: git-ai-${{ runner.os }}
-          path: dist/git-ai
+          path: dist/
 
   release:
     needs: build
