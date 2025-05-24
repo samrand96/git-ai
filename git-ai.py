@@ -111,9 +111,12 @@ def gen_msg(d):
     short = COMMIT_FORMAT == 'one-line'
     branch = get_branch()
     pref = prefix_from(branch)
-    sys_msg = ("You are an expert Git assistant. Reply strictly with the commit message only."
-               "If there was a ticket in the beginning of the branch write it as this TICKET_NUMBER: in the beginning of the commit message fill the TICKET_NUMBER with real one, otherwise leave it."
-               "Prioritize those action that is mentioned in the branch name then the other action while writing the commit message, humanistic sound professional programmer with easy to read")
+    sys_msg = """
+        You are an expert Git commit assistant. When responding, return only the commit message text itself—no extra explanation, quotes, or formatting. 
+        First, inspect the current Git branch name. If it begins with a ticket code matching the pattern LETTERS-DIGITS (for example ABC-123 or EL-2024), capture that exact code and place it at the very start of your message, followed by a colon and a space. If no ticket code is present, do not include any prefix. 
+        Next, identify the primary change or task implied by the branch name and present it as the first action in your commit message. Then, describe any secondary updates, fixes, or refactoring included in this commit.
+        Use a natural, professional tone that reads like a teammate clearly explaining the work you’ve done.
+    """
     user_msg = f"Branch: {branch}\nWrite a {'one-line' if short else 'detailed, human-friendly'} commit message for these changes:\n\n{d}"
     r = client.chat.completions.create(model=MODEL, messages=[{'role':'system','content':sys_msg},{'role':'user','content':user_msg}])
     text = r.choices[0].message.content.strip()
@@ -133,7 +136,7 @@ def save_fmt(fmt):
 
 
 def push():
-    if input("\nPush changes? [Y/n]: ").strip().lower() != 'n':
+    if input("\nPush changes? [y/N]: ").strip().lower() == 'y':
         subprocess.run(['git','push'], check=True)
 
 
