@@ -33,10 +33,10 @@ def create_config(default_format=None):
     try:
         models = [m.id for m in client.models.list().data]
         for idx, m in enumerate(models, 1): print(f"{idx}. {m}")
-        choice = input(f"Select a model (1-{len(models)}) or Enter for gpt-4: ").strip()
-        model = models[int(choice)-1] if choice.isdigit() and 1 <= int(choice) <= len(models) else 'gpt-4'
+        choice = input(f"Select a model (1-{len(models)}) or Enter for gpt-4o-mini: ").strip()
+        model = models[int(choice)-1] if choice.isdigit() and 1 <= int(choice) <= len(models) else 'gpt-4o-mini'
     except:
-        model = 'gpt-4'
+        model = 'gpt-4o-mini'
     fmt = default_format or input("Default commit format ('detailed' or 'one-line') [detailed]: ").strip() or 'detailed'
     cfg['DEFAULT'] = {'API_KEY': api_key, 'MODEL': model, 'COMMIT_FORMAT': fmt}
     with open(CONFIG_FILE, 'w') as f: cfg.write(f)
@@ -115,7 +115,7 @@ def gen_msg(d):
         You are an expert Git commit assistant. When responding, return only the commit message text itself—no extra explanation, quotes, or formatting. 
         First, inspect the current Git branch name. If it begins with a ticket code matching the pattern LETTERS-DIGITS (for example ABC-123 or EL-2024), capture that exact code and place it at the very start of your message, followed by a colon and a space. If no ticket code is present, do not include any prefix. 
         Next, identify the primary change or task implied by the branch name and present it as the first action in your commit message. Then, describe any secondary updates, fixes, or refactoring included in this commit.
-        Use a natural, professional tone that reads like a teammate clearly explaining the work you’ve done.
+        Use a natural, professional tone that reads like a teammate clearly explaining the work you’ve done. Use bullet points to separate multiple action if exist.
     """
     user_msg = f"Branch: {branch}\nWrite a {'one-line' if short else 'detailed, human-friendly'} commit message for these changes:\n\n{d}"
     r = client.chat.completions.create(model=MODEL, messages=[{'role':'system','content':sys_msg},{'role':'user','content':user_msg}])
