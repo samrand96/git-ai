@@ -28,7 +28,7 @@ jobs:
           pyinstaller --onefile git-ai.py
 
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: git-ai-${{ runner.os }}
           path: dist/
