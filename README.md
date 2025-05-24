@@ -1,177 +1,175 @@
-# Git-AI: AI-Powered Git Commit Message Generator
+# Git-AI: Your Friendly AI-Powered Commit Companion
 
-Git-AI is a powerful command-line tool that leverages OpenAI's GPT models to generate professional, concise, and context-aware Git commit messages. It simplifies your development workflow by automatically staging changes, creating commit messages, and optionally pushing them to your remote repository. With support for managing OpenAI API keys and models directly from your environment, Git-AI ensures a seamless experience for developers.
-
----
-
-## Features
-
-- **AI-Powered Commit Messages**: Generate clear and professional commit messages using OpenAI's GPT models.
-- **Automatic Git Staging**: Automatically stages all changes before generating commit messages.
-- **Model Management**: Easily list and select from available OpenAI models.
-- **Zsh Integration**: Save and retrieve OpenAI API keys and models directly from your `~/.zshrc` file.
-- **Push Confirmation**: Optionally push your commits to the remote repository after applying them.
+Git-AI transforms your staged changes into clear, human-sounding Git commit messages—powered by OpenAI’s GPT models. It handles staging, message generation, inline review, committing, and pushing, so you can focus entirely on code.
 
 ---
 
-## Requirements
+## Table of Contents
 
-- Python 3.7 or higher
-- OpenAI API key
-- Git installed and configured
-- Zsh as the default shell
+1. [Prerequisites](#prerequisites)
+2. [Installation](#installation)
+3. [Configuration](#configuration)
+4. [Usage](#usage)
+
+   * [Generating a Commit](#generating-a-commit)
+   * [Listing Models](#listing-models)
+   * [Changing Format](#changing-format)
+   * [Editing Configuration](#editing-configuration)
+5. [Advanced: Standalone Binary](#advanced-standalone-binary)
+6. [License](#license)
+
+---
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+* **Python 3.8+** installed and on your `PATH`.
+* **Git** installed and configured (username/email set).
+* An **OpenAI API key**. You can obtain one at [https://platform.openai.com](https://platform.openai.com).
+* (Optional) **pyinstaller** if you plan to create a standalone binary.
 
 ---
 
 ## Installation
 
-1. **Clone the Repository**:
+1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/samrand96/git-ai.git
    cd git-ai
    ```
 
-2. **Install Dependencies**:
+2. **Install dependencies**:
+
    ```bash
-   pip install openai
+   pip install -r requirements.txt
    ```
 
-3. **Ensure Zsh Shell is Set**:
-   Make sure you're using Zsh (`echo $SHELL` should return `/bin/zsh`).
+3. **Make the script executable** (Unix/macOS):
+
+   ```bash
+   chmod +x git-ai.py
+   ```
+
+---
+
+## Configuration
+
+On first run, Git-AI will automatically prompt you to:
+
+1. Enter your **OpenAI API key**.
+2. Choose a **model** from the fetched list (default `gpt-4`).
+3. Select your default **commit style**: `detailed` (multi-sentence) or `one-line`.
+
+These settings are saved in an INI file at:
+
+* **Linux**: `~/.config/samrand.git.ini`
+* **macOS**: `~/.config/samrand.git.ini`
+* **Windows**: `%APPDATA%\samrand.git.ini`
+
+> **Tip**: You can open this file in any text editor to inspect or manually tweak values.
+
+To reconfigure at any time, simply run:
+
+```bash
+python git-ai.py --config
+```
+
+This enters interactive mode, showing current values and letting you update only the fields you wish (leave blank to retain the existing setting).
 
 ---
 
 ## Usage
 
-### Initial Setup
+### Generating a Commit
 
-1. **Run the Tool**:
-   If your OpenAI API key is not already set, the tool will prompt you to enter it:
+1. **Stage your changes** in Git (e.g., `git add .`).
+2. Run:
+
    ```bash
    python git-ai.py
    ```
-   - The API key will be saved to your `~/.zshrc` for future use.
+3. The tool will:
 
-2. **Set a Default Model**:
-   To set a specific OpenAI model (e.g., `gpt-3.5-turbo`), use:
-   ```bash
-   python git-ai.py -s gpt-3.5-turbo
-   ```
-   - The model choice will also be saved to `~/.zshrc`.
+   * Stage all unstaged changes.
+   * Detect your **current branch** name and extract any ticket prefix (e.g. `ABC-123`).
+   * Generate both a **detailed** and a **one-line** commit message.
+   * Display the chosen message inline.
+   * Prompt: **Edit before commit?**
+     • Press **Enter** to skip edits.
+     • Type your own message, ending with an empty line, to replace it.
+   * Commit the message.
+   * Prompt: **Push changes?** `[Y/n]`.
 
----
+### Listing Models
 
-### Workflow
-
-1. **Generate and Apply a Commit Message**:
-   ```bash
-   python git-ai.py
-   ```
-   - Automatically stages changes.
-   - Generates an AI-powered commit message.
-   - Applies the commit.
-   - Prompts to push the changes.
-
-2. **List Available OpenAI Models**:
-   ```bash
-   python git-ai.py -l
-   ```
-   Example Output:
-   ```
-   Available models:
-   - gpt-4
-   - gpt-3.5-turbo
-   - davinci
-   - curie
-   ```
-
-3. **Change the OpenAI Model**:
-   ```bash
-   python git-ai.py -s gpt-4
-   ```
-   Example Output:
-   ```
-   Model 'gpt-4' saved to ~/.zshrc.
-   ```
-
-4. **Push Changes**:
-   After generating and applying a commit message, Git-AI will ask:
-   ```
-   Do you want to push the changes to the remote repository? [Y/n]:
-   ```
-   Type `Y` or press Enter to push.
-
----
-
-## Configuration Management
-
-### Save API Key and Model to `~/.zshrc`
-Git-AI stores your API key and selected model in `~/.zshrc`:
-```bash
-export OPENAI_API_KEY="your-api-key"
-export OPENAI_MODEL="gpt-4"
-```
-Run `source ~/.zshrc` after any changes to apply them.
-
-### Retrieve Configuration
-Git-AI automatically retrieves the API key and model from your `~/.zshrc` file. If any value is missing, the tool will prompt you to provide it.
-
----
-
-## Example Output
+To see all available OpenAI models:
 
 ```bash
-python git-ai.py
+python git-ai.py --list-models
 ```
 
-Output:
+Pick any model by its exact name or its index when reconfiguring.
+
+### Changing Format
+
+Override or switch your default commit style:
+
+```bash
+# One-off:
+python git-ai.py -f one-line
+
+# Persist default:
+python git-ai.py -f detailed
 ```
-All changes have been staged.
-Generating commit message...
 
-Suggested commit message:
-- Fix null pointer exception in user login flow
-- Update documentation for API integration
+This updates your INI so future runs use the selected style automatically.
 
-Commit successfully applied!
+### Editing Configuration
 
-Do you want to push the changes to the remote repository? [Y/n]: Y
-Changes successfully pushed to the remote repository!
+Enter full configuration mode to update API key, model, or format:
+
+```bash
+python git-ai.py -c
 ```
+
+Follow the interactive prompts. Leave blank to keep existing values.
 
 ---
 
-## Creating a Binary
+## Advanced: Standalone Binary
 
-You can generate a standalone executable (binary) of Git-AI using [PyInstaller](https://www.pyinstaller.org/). Here’s how:
+If you’d rather run `git-ai` without Python installed at runtime:
 
-1. **Install PyInstaller**:
+1. **Install PyInstaller** (if you haven’t already):
+
    ```bash
    pip install pyinstaller
    ```
-2. **Create the Executable**:
+2. **Build the executable**:
+
    ```bash
    pyinstaller --onefile git-ai.py
    ```
-   - PyInstaller will bundle all dependencies into a single binary located in the `dist/` directory.
-3. **Run the Binary**:
-   ```bash
-   ./dist/git-ai
-   ```
-4. **(Optional) Make It Global**:
-   Move the binary to a directory in your system path:
+3. **Copy it into your PATH**:
+
    ```bash
    mv dist/git-ai /usr/local/bin/git-ai
    chmod +x /usr/local/bin/git-ai
    ```
-   Now you can run `git-ai` from anywhere.
+4. Now run:
+
+   ```bash
+   git-ai
+   ```
 
 ---
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-Git-AI: Simplify your Git workflow with the power of AI! 🚀
+*Git-AI: Let AI handle the words so you can handle the code.*
