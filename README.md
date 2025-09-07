@@ -1,20 +1,22 @@
+
 # Git-AI: Your Friendly AI-Powered Commit Companion
 
-Git-AI transforms your staged changes into clear, human-sounding Git commit messages—powered by OpenAI’s GPT models. It handles staging, message generation, inline review, committing, and pushing, so you can focus entirely on code.
+Git-AI transforms your staged changes into clear, human-sounding Git commit messages—powered by LLMs (OpenAI, Ollama, Anthropic, and more). It handles staging, message generation, inline review, committing, and pushing, so you can focus entirely on code. The new architecture is provider-agnostic, modular, and fully extensible.
 
 ---
 
 ## Table of Contents
 
+
 1. [Prerequisites](#prerequisites)
 2. [Installation](#installation)
 3. [Configuration](#configuration)
 4. [Usage](#usage)
-
    * [Generating a Commit](#generating-a-commit)
    * [Listing Models](#listing-models)
    * [Changing Format](#changing-format)
    * [Editing Configuration](#editing-configuration)
+   * [Switching Providers](#switching-providers)
 5. [Advanced: Standalone Binary](#advanced-standalone-binary)
 6. [To-Do / Future Plans](#to-do--future-plans)
 7. [License](#license)
@@ -27,7 +29,7 @@ Before you begin, ensure you have:
 
 * **Python 3.8+** installed and on your `PATH`.
 * **Git** installed and configured (username/email set).
-* An **OpenAI API key**. You can obtain one at [https://platform.openai.com](https://platform.openai.com).
+* An **API key** for your chosen provider (OpenAI, Anthropic, etc). You can obtain an OpenAI key at [https://platform.openai.com](https://platform.openai.com). Ollama requires a local server running.
 * (Optional) **pyinstaller** if you plan to create a standalone binary.
 
 ---
@@ -59,25 +61,35 @@ Before you begin, ensure you have:
 
 On first run, Git-AI will automatically prompt you to:
 
-1. Enter your **OpenAI API key**.
-2. Choose a **model** from the fetched list (default `gpt-4`).
-3. Select your default **commit style**: `detailed` (multi-sentence) or `one-line`.
+
+1. Select your **provider** (OpenAI, Ollama, Anthropic, ...).
+2. Enter your **API key** (if required by provider).
+3. Choose a **model** from the fetched list (or type your own).
+4. Select your default **commit style**: `detailed` (multi-sentence) or `one-line`.
 
 These settings are saved in an INI file at:
 
-* **Linux**: `~/.config/samrand.git.ini`
-* **macOS**: `~/.config/samrand.git.ini`
-* **Windows**: `%APPDATA%\samrand.git.ini`
+
+* **Linux**: `~/.config/sam.git.ini`
+* **macOS**: `~/.config/sam.git.ini`
+* **Windows**: `%APPDATA%\sam.git.ini`
 
 > **Tip**: You can open this file in any text editor to inspect or manually tweak values.
+
 
 To reconfigure at any time, simply run:
 
 ```bash
-python git-ai.py --config
+python main.py config --interactive
 ```
 
-This enters interactive mode, showing current values and letting you update only the fields you wish (leave blank to retain the existing setting).
+This enters interactive mode, showing current values and letting you update only the fields you wish (leave blank to retain the existing setting). You can also set values directly:
+
+```bash
+python main.py config --set PROVIDER ollama
+python main.py config --set-provider openai API_KEY sk-...
+python main.py config --set-provider ollama MODEL llama3
+```
 
 ---
 
@@ -85,17 +97,17 @@ This enters interactive mode, showing current values and letting you update only
 
 ### Generating a Commit
 
+
 1. **Stage your changes** in Git (e.g., `git add .`).
 2. Run:
 
    ```bash
-   python git-ai.py
+   python main.py commit
    ```
 3. The tool will:
-
    * Stage all unstaged changes.
    * Detect your **current branch** name and extract any ticket prefix (e.g. `ABC-123`).
-   * Generate both a **detailed** and a **one-line** commit message.
+   * Generate a commit message using your selected provider and model.
    * Display the chosen message inline.
    * Prompt: **Edit before commit?**
      • Press **Enter** to skip edits.
@@ -103,43 +115,57 @@ This enters interactive mode, showing current values and letting you update only
    * Commit the message.
    * Prompt: **Push changes?** `[Y/n]`.
 
+
 ### Listing Models
 
-To see all available OpenAI models:
+To see all available models for your current provider:
 
 ```bash
-python git-ai.py --list-models
+python main.py list-models
 ```
 
 Pick any model by its exact name or its index when reconfiguring.
+
 
 ### Changing Format
 
 Override or switch your default commit style:
 
 ```bash
-# One-off:
-python git-ai.py -f one-line
-
-# Persist default:
-python git-ai.py -f detailed
+python main.py config --set COMMIT_FORMAT one-line
+python main.py config --set COMMIT_FORMAT detailed
 ```
 
-This updates your INI so future runs use the selected style automatically.
+This updates your config so future runs use the selected style automatically.
+
 
 ### Editing Configuration
 
-Enter full configuration mode to update API key, model, or format:
+Enter full configuration mode to update provider, API key, model, or format:
 
 ```bash
-python git-ai.py -c
+python main.py config --interactive
 ```
 
 Follow the interactive prompts. Leave blank to keep existing values.
 
+You can also set any value directly (see above).
+
+### Switching Providers
+
+To switch between OpenAI, Ollama, or Anthropic (or add your own):
+
+```bash
+python main.py config --set PROVIDER ollama
+python main.py config --set PROVIDER openai
+```
+
+Then use `--set-provider` to update provider-specific settings as needed.
+
 ---
 
 ## Advanced: Standalone Binary
+
 
 If you’d rather run `git-ai` without Python installed at runtime:
 
@@ -151,7 +177,7 @@ If you’d rather run `git-ai` without Python installed at runtime:
 2. **Build the executable**:
 
    ```bash
-   pyinstaller --onefile git-ai.py
+   pyinstaller --onefile main.py
    ```
 3. **Copy it into your PATH**:
 
