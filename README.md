@@ -52,7 +52,7 @@ Before you begin, ensure you have:
 3. **Make the script executable** (Unix/macOS):
 
    ```bash
-   chmod +x git-ai.py
+   chmod +x main.py
    ```
 
 ---
