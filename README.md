@@ -1,4 +1,3 @@
-
 # Git-AI: Your Friendly AI-Powered Commit Companion
 
 Git-AI transforms your staged changes into clear, human-sounding Git commit messages—powered by LLMs (OpenAI, Ollama, Anthropic, and more). It handles staging, message generation, inline review, committing, and pushing, so you can focus entirely on code. The new architecture is provider-agnostic, modular, and fully extensible.
@@ -17,9 +16,10 @@ Git-AI transforms your staged changes into clear, human-sounding Git commit mess
    * [Changing Format](#changing-format)
    * [Editing Configuration](#editing-configuration)
    * [Switching Providers](#switching-providers)
-5. [Advanced: Standalone Binary](#advanced-standalone-binary)
-6. [To-Do / Future Plans](#to-do--future-plans)
-7. [License](#license)
+5. [Cross-Platform Build Scripts](#advanced-standalone-binary)
+6. [Advanced: Standalone Binary (DIY)](#advanced-standalone-binary)
+7. [To-Do / Future Plans](#to-do--future-plans)
+8. [License](#license)
 
 ---
 
@@ -153,7 +153,7 @@ You can also set any value directly (see above).
 
 ### Switching Providers
 
-To switch between OpenAI, Ollama, or Anthropic (or add your own):
+To switch between OpenAI, Ollama, Anthropic, Gemini, or LMStudio (or add your own):
 
 ```bash
 python main.py config --set PROVIDER ollama
@@ -164,8 +164,30 @@ Then use `--set-provider` to update provider-specific settings as needed.
 
 ---
 
-## Advanced: Standalone Binary
+## Cross-Platform Build Scripts
 
+To easily build a standalone executable and set up your environment, use the provided scripts:
+
+### Windows
+
+- Use `build.bat` (right-click and run as administrator):
+   - Checks for PyInstaller and builds with no prompt.
+   - Optionally adds the `dist` folder to your PATH for the session or permanently.
+   - Shows a PowerShell command for session use if desired.
+
+### Linux/macOS
+
+- Use `build.sh`:
+   - Make it executable: `chmod +x build.sh`
+   - Run: `./build.sh`
+   - Checks for PyInstaller and builds with no prompt.
+   - Optionally adds the `dist` folder to your PATH for the session or permanently (shell profile).
+
+After building, you can run the CLI from anywhere if you add it to your PATH.
+
+---
+
+## Advanced: Standalone Binary
 
 If you’d rather run `git-ai` without Python installed at runtime:
 

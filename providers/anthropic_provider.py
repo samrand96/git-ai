@@ -22,9 +22,5 @@ class AnthropicProvider(ProviderBase):
 		return response.content[0].text.strip() if hasattr(response.content[0], 'text') else str(response.content[0])
 
 	def list_models(self):
-		# Anthropic API does not support listing models directly; return known models
-		return [
-			'claude-3-opus-20240229',
-			'claude-3-sonnet-20240229',
-			'claude-3-haiku-20240307',
-		]
+		models = self.client.models.list(limit=20)
+		return [m.id for m in models.data]
