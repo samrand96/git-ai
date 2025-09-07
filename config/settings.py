@@ -7,35 +7,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 class Settings:
-	@classmethod
-	def config_file_exists(cls) -> bool:
-		"""Return True if the config file exists."""
-		return cls.get_config_file().exists()
-	@classmethod
-	def config_is_valid(cls) -> bool:
-		"""
-		Returns True if the config file exists and required config values for the selected provider are present.
-		"""
-		if not cls.config_file_exists():
-			return False
-		# Load config to check required fields
-		parser = configparser.ConfigParser()
-		parser.read(cls.get_config_file())
-		# Check global provider
-		provider = parser['DEFAULT'].get('PROVIDER', 'openai').lower()
-		# Required fields for each provider
-		required = {
-			'openai': ['API_KEY', 'MODEL'],
-			'ollama': ['HOST', 'MODEL'],
-			'anthropic': ['API_KEY', 'MODEL'],
-		}
-		section = provider.upper()
-		if section not in parser:
-			return False
-		for key in required.get(provider, []):
-			if not parser[section].get(key):
-				return False
-		return True
 	"""
 	Central configuration manager for git-ai.
 	Supports loading, saving, and updating settings for API, model, commit format, templates, hooks, language, etc.
@@ -61,7 +32,42 @@ class Settings:
 			'API_KEY': '',
 			'MODEL': 'claude-3-opus-20240229',
 		},
+		'gemini': {
+            'API_KEY': '',
+			'MODEL': 'gemini-1.5-pro',
+        }
 	}
+
+	@classmethod
+	def config_file_exists(cls) -> bool:
+		"""Return True if the config file exists."""
+		return cls.get_config_file().exists()
+	@classmethod
+	def config_is_valid(cls) -> bool:
+		"""
+		Returns True if the config file exists and required config values for the selected provider are present.
+		"""
+		if not cls.config_file_exists():
+			return False
+		# Load config to check required fields
+		parser = configparser.ConfigParser()
+		parser.read(cls.get_config_file())
+		# Check global provider
+		provider = parser['DEFAULT'].get('PROVIDER', 'openai').lower()
+		# Required fields for each provider
+		required = {
+			'openai': ['API_KEY', 'MODEL'],
+			'ollama': ['HOST', 'MODEL'],
+			'anthropic': ['API_KEY', 'MODEL'],
+			'gemini': ['API_KEY', 'MODEL'],
+		}
+		section = provider.upper()
+		if section not in parser:
+			return False
+		for key in required.get(provider, []):
+			if not parser[section].get(key):
+				return False
+		return True
 
 	@staticmethod
 	def get_config_dir() -> Path:
@@ -77,7 +83,6 @@ class Settings:
 	@classmethod
 	def get_config_file(cls) -> Path:
 		return cls.get_config_dir() / 'sam.git.ini'
-
 
 	def __init__(self, config_file: Optional[Path] = None):
 		self.config_file = config_file or self.get_config_file()
