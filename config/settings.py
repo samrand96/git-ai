@@ -35,6 +35,10 @@ class Settings:
 		'gemini': {
             'API_KEY': '',
 			'MODEL': 'gemini-1.5-pro',
+        },
+		'lmstudio': {
+            'HOST': 'http://localhost:1234',
+			'MODEL': 'gemma-3-1b-it-qat',
         }
 	}
 
@@ -60,6 +64,7 @@ class Settings:
 			'ollama': ['HOST', 'MODEL'],
 			'anthropic': ['API_KEY', 'MODEL'],
 			'gemini': ['API_KEY', 'MODEL'],
+			'lmstudio': ['HOST', 'MODEL'],
 		}
 		section = provider.upper()
 		if section not in parser:
