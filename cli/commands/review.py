@@ -5,56 +5,9 @@ import sys
 from datetime import datetime
 from core.config import settings
 from providers.factory import get_provider
-from utils.git import get_diff
+from utils import get_diff, clean_review_output, Colors, format_cli_output
 
 REVIEW_TYPES = ["all", "logical", "security", "performance", "style", "documentation"]
-
-# ANSI color codes for CLI formatting
-class Colors:
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    MAGENTA = '\033[95m'
-    CYAN = '\033[96m'
-    WHITE = '\033[97m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    END = '\033[0m'
-
-    @staticmethod
-    def colorize(text, color):
-        return f"{color}{text}{Colors.END}"
-
-    @staticmethod
-    def supports_color():
-        """Check if terminal supports ANSI colors"""
-        return hasattr(sys.stdout, 'isatty') and sys.stdout.isatty() and os.name != 'nt' or 'ANSICON' in os.environ
-
-def format_cli_output(review_text):
-    """Format the AI review text with colors for CLI display"""
-    if not Colors.supports_color():
-        return review_text
-
-    lines = review_text.split('\n')
-    formatted_lines = []
-
-    for line in lines:
-        line_lower = line.lower()
-        if any(word in line_lower for word in ['error', 'bug', 'vulnerability', 'critical', 'severe', 'dangerous']):
-            formatted_lines.append(Colors.colorize(line, Colors.RED + Colors.BOLD))
-        elif any(word in line_lower for word in ['warning', 'caution', 'potential', 'consider', 'should']):
-            formatted_lines.append(Colors.colorize(line, Colors.YELLOW))
-        elif any(word in line_lower for word in ['good', 'excellent', 'well', 'nice', 'correct', 'proper']):
-            formatted_lines.append(Colors.colorize(line, Colors.GREEN))
-        elif line.startswith('#') or line.startswith('##'):
-            formatted_lines.append(Colors.colorize(line, Colors.CYAN + Colors.BOLD))
-        elif line.startswith('-') or line.startswith('*') or line.startswith('•'):
-            formatted_lines.append(Colors.colorize(line, Colors.WHITE))
-        else:
-            formatted_lines.append(line)
-
-    return '\n'.join(formatted_lines)
 
 
 def main():
@@ -87,12 +40,12 @@ def main():
         changes_desc = "all changes (staged + unstaged)"
 
     if not diff.strip():
-        print(Colors.colorize(f"ℹ No {changes_desc} to review.", Colors.BLUE))
-        print(Colors.colorize("💡 Try:", Colors.YELLOW))
-        print(Colors.colorize("  - Make some changes to your files", Colors.WHITE))
-        print(Colors.colorize("  - Use --changes staged (for git add'ed files)", Colors.WHITE))
-        print(Colors.colorize("  - Use --changes unstaged (for modified files)", Colors.WHITE))
-        print(Colors.colorize("  - Use --changes last-commit (for previous commit)", Colors.WHITE))
+        print(Colors.info(f"ℹ No {changes_desc} to review."))
+        print(Colors.warning("💡 Try:"))
+        print(Colors.dim("  - Make some changes to your files"))
+        print(Colors.dim("  - Use --changes staged (for git add'ed files)"))
+        print(Colors.dim("  - Use --changes unstaged (for modified files)"))
+        print(Colors.dim("  - Use --changes last-commit (for previous commit)"))
         return
 
     review_type = args.type
@@ -174,7 +127,7 @@ Generate the complete HTML report now:"""
 
 **IMPORTANT CLI FORMATTING NOTES:**
 - Mark severe issues with keywords like "ERROR", "VULNERABILITY", "CRITICAL", "DANGEROUS" so they get colored red
-- Mark warnings with "WARNING", "CAUTION", "POTENTIAL", "CONSIDER", "SHOULD" so they get colored yellow  
+- Mark warnings with "WARNING", "CAUTION", "POTENTIAL", "CONSIDER", "SHOULD" so they get colored yellow
 - Mark good practices with "GOOD", "EXCELLENT", "WELL", "NICE", "CORRECT", "PROPER" so they get colored green
 - Use "##" for section headers to get cyan color formatting
 - Use "-" or "*" for bullet points to get white color formatting
@@ -186,27 +139,29 @@ Generate the complete HTML report now:"""
 
 Provide your comprehensive review now:"""
 
-    print(Colors.colorize(f"🔍 Reviewing your {changes_desc} with AI...", Colors.CYAN + Colors.BOLD))
+    print(Colors.header(f"🔍 Reviewing your {changes_desc} with AI..."))
     try:
         review = provider.generate(prompt=prompt)
+        # Clean up the AI-generated review
+        review = clean_review_output(review)
     except Exception as e:
-        print(Colors.colorize(f"❌ Error generating review: {e}", Colors.RED + Colors.BOLD))
+        print(Colors.error(f"❌ Error generating review: {e}"))
         return
 
     if html:
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(review)
-        print(Colors.colorize(f"✅ Professional AI review report saved to: {output_file}", Colors.GREEN + Colors.BOLD))
-        print(Colors.colorize(f"📊 Open the HTML file in your browser to view the interactive report", Colors.BLUE))
+        print(Colors.success(f"✅ Professional AI review report saved to: {output_file}"))
+        print(Colors.info(f"📊 Open the HTML file in your browser to view the interactive report"))
     else:
         formatted_review = format_cli_output(review)
-        print(Colors.colorize("\n" + "="*60, Colors.CYAN + Colors.BOLD))
-        print(Colors.colorize("  🚀 PROFESSIONAL AI CODE REVIEW REPORT  ", Colors.CYAN + Colors.BOLD))
-        print(Colors.colorize("="*60 + "\n", Colors.CYAN + Colors.BOLD))
+        print(Colors.header("\n" + "="*60))
+        print(Colors.header("  🚀 PROFESSIONAL AI CODE REVIEW REPORT  "))
+        print(Colors.header("="*60 + "\n"))
         print(formatted_review)
-        print(Colors.colorize("\n" + "="*60, Colors.CYAN + Colors.BOLD))
-        print(Colors.colorize("  📋 Review Complete - Check findings above  ", Colors.CYAN + Colors.BOLD))
-        print(Colors.colorize("="*60, Colors.CYAN + Colors.BOLD))
+        print(Colors.header("\n" + "="*60))
+        print(Colors.header("  📋 Review Complete - Check findings above  "))
+        print(Colors.header("="*60))
 
 def _get_review_scope_instructions(review_type):
     """Get detailed instructions for each review type"""

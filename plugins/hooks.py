@@ -3,6 +3,7 @@ import os
 import stat
 from pathlib import Path
 from core.config import settings
+from utils import Colors
 
 HOOK_TEMPLATES = {
 	'pre-commit': """#!/bin/sh\n# git-ai pre-commit hook\npython git-ai.py --hook pre-commit\n""",
@@ -59,8 +60,8 @@ if __name__ == "__main__":
 	if args.enable:
 		settings.set('HOOKS_ENABLED', 'true')
 		enable_hooks()
-		print("git-ai hooks enabled.")
+		print(Colors.success("✅ git-ai hooks enabled."))
 	elif args.disable:
 		settings.set('HOOKS_ENABLED', 'false')
 		disable_hooks()
-		print("git-ai hooks disabled.")
+		print(Colors.info("ℹ️ git-ai hooks disabled."))

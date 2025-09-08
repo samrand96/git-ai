@@ -1,6 +1,6 @@
 import sys
 from cli.parser import get_main_parser, COMMANDS
-
+from utils import Colors
 from pathlib import Path
 from core.config import settings
 
@@ -9,7 +9,8 @@ def main():
     args, unknown = parser.parse_known_args()
     config_is_valid = settings.config_is_valid()
     if args.command != 'config' and (not config_is_valid):
-        print("[ERROR] No configuration file found. Please run 'python main.py config --interactive' to set up git-ai before using this command.")
+        print(Colors.error("❌ No configuration file found."))
+        print(Colors.info("Let's set it up now. You can change these settings later by running: 'git-ai config --interactive'"))
         cmd_func = COMMANDS['config']
         sys.argv = [sys.argv[0]] + unknown + ['--interactive']
         cmd_func()

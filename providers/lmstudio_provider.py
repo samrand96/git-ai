@@ -2,6 +2,7 @@
 import requests
 from .base import ProviderBase
 from core.config import settings
+from utils import Colors
 
 class LMStudioProvider(ProviderBase):
     def __init__(self, host: str = None, model: str = None, **kwargs):
@@ -15,9 +16,8 @@ class LMStudioProvider(ProviderBase):
         payload = {
             "model": self.model,
             "prompt": prompt,
-            **kwargs
         }
-        resp = requests.post(url, json=payload, timeout=60)
+        resp = requests.post(url, json=payload, timeout=1000)
         resp.raise_for_status()
         result = resp.json()
         return result.get('choices', [{}])[0].get('text', '')
@@ -31,5 +31,5 @@ class LMStudioProvider(ProviderBase):
             data = resp.json()
             return [m['id'] for m in data.get('data', [])]
         except Exception:
-            print("Could not fetch models from LM Studio API; returning configured model.")
+            print(Colors.warning("⚠️ Could not fetch models from LM Studio API; returning configured model."))
             return [self.model]

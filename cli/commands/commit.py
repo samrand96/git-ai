@@ -1,7 +1,7 @@
 # CLI command to generate and make a commit using the configured provider
 from core.config import settings
 from providers.factory import get_provider
-from utils.git import get_branch, get_diff, stage_all, commit, push
+from utils import get_branch, get_diff, stage_all, commit, push, clean_commit_message, Colors
 
 def get_ticket_prefix(branch):
 	import re
@@ -28,7 +28,7 @@ def main():
 	stage_all()
 	diff = get_diff(staged=True)
 	if not diff.strip():
-		print("No staged changes to commit.")
+		print(Colors.info("ℹ No staged changes to commit."))
 		return
 	branch = get_branch()
 	prefix = get_ticket_prefix(branch)
@@ -40,6 +40,8 @@ def main():
 		"Use a natural, professional tone that reads like a teammate clearly explaining the work you’ve done. Use bullet points to separate multiple actions if they exist."
 	)
 	user_msg = f"Branch: {branch}\nWrite a {'one-line' if short else 'detailed, human-friendly'} commit message for these changes:\n\n{diff}"
+	
+	print(Colors.header("🤖 Generating commit message with AI..."))
 	commit_msg = provider.generate(
 		prompt=user_msg,
 		messages=[
@@ -47,12 +49,20 @@ def main():
 			{"role": "user", "content": user_msg}
 		]
 	)
+	
+	# Clean up the AI-generated commit message
+	commit_msg = clean_commit_message(commit_msg)
+	
 	if prefix and not commit_msg.startswith(prefix):
 		commit_msg = f"{prefix}: {commit_msg}"
-	print("\nGenerated commit message:\n", commit_msg)
-	edit = input("Edit before commit? [y/N]: ").strip().lower() == 'y'
+	
+	print(Colors.success("\n✅ Generated commit message:"))
+	print(Colors.highlight(commit_msg))
+	print()
+	
+	edit = input(Colors.dim("Edit before commit? [y/N]: ")).strip().lower() == 'y'
 	if edit:
-		print("Enter new commit message. End with an empty line:")
+		print(Colors.dim("Enter new commit message. End with an empty line:"))
 		lines = []
 		while True:
 			line = input()
@@ -60,11 +70,15 @@ def main():
 				break
 			lines.append(line)
 		commit_msg = '\n'.join(lines) if lines else commit_msg
+	
 	commit(commit_msg)
-	print("Committed.")
+	print(Colors.success("✅ Committed successfully."))
+	
 	if args.push:
 		push()
-		print("Pushed.")
+		print(Colors.success("🚀 Pushed to remote."))
+	else:
+		print(Colors.dim("💡 Use --push flag to automatically push after commit."))
 
 if __name__ == "__main__":
 	main()

@@ -1,8 +1,8 @@
 # Utility functions for input/output operations
 
-
 import sys
 from pathlib import Path
+from .colors import Colors
 
 def read_file(path, encoding='utf-8', binary=False):
 	"""Read the contents of a file. Supports text or binary."""
@@ -30,7 +30,8 @@ def print_success(msg, color=True):
 	_print_with_prefix(msg, prefix='[OK]', color_code='32', color=color)
 
 def _print_with_prefix(msg, prefix='', color_code='37', color=True, file=sys.stdout):
-	if color and sys.stdout.isatty():
+	# This is deprecated - use Colors utility instead
+	if color and Colors.supports_color():
 		print(f"\033[{color_code}m{prefix} {msg}\033[0m", file=file)
 	else:
 		print(f"{prefix} {msg}", file=file)

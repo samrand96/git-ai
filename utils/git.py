@@ -6,9 +6,9 @@ def run_git_command(args, repo_path=None, capture_output=True, check=True, text=
 	"""Run a git command and return output or raise error."""
 	cmd = ['git'] + args
 	kwargs = {
-		'cwd': str(repo_path) if repo_path else None, 
-		'capture_output': capture_output, 
-		'check': check, 
+		'cwd': str(repo_path) if repo_path else None,
+		'capture_output': capture_output,
+		'check': check,
 		'text': text,
 		'encoding': 'utf-8',
 		'errors': 'replace'  # Replace invalid characters instead of failing

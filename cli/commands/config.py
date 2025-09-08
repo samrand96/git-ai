@@ -1,41 +1,50 @@
 # CLI config editor for global and provider-specific settings
 from core.config import settings
+from utils import Colors
 
 def print_current():
-	print("Current global settings:")
+	print(Colors.header("📋 Current global settings:"))
 	for k, v in settings._data.items():
-		print(f"  {k}: {v}")
-	print("\nProvider settings:")
+		print(Colors.info(f"  {k}: ") + Colors.highlight(str(v)))
+	print(Colors.header("\n🔧 Provider settings:"))
 	for provider, pdata in settings._provider_data.items():
-		print(f"[{provider}]")
+		print(Colors.success(f"[{provider}]"))
 		for k, v in pdata.items():
-			print(f"  {k}: {v}")
+			print(Colors.dim(f"  {k}: ") + Colors.highlight(str(v)))
 
 def interactive_edit():
 	print_current()
-	print("\nEdit global settings (press Enter to keep current value):")
+	print(Colors.header("\n✏️ Edit global settings (press Enter to keep current value):"))
 	for k in settings._data:
-		val = input(f"{k} [{settings._data[k]}]: ").strip()
+		current_val = settings._data[k]
+		val = input(Colors.dim(f"{k} [{current_val}]: ")).strip()
 		if val:
 			settings.set(k, val)
-	print("\nEdit provider settings:")
+			print(Colors.success(f"✅ Updated {k} = {val}"))
+	
+	print(Colors.header("\n🔧 Edit provider settings:"))
 	provider = settings.get_provider()
 	provider_items = settings._provider_data.get(provider, {})
 	from providers.factory import get_provider
+	
 	for k in provider_items:
 		if k == 'MODEL':
-			print(f"Available models for {provider}:")
+			print(Colors.info(f"📋 Available models for {provider}:"))
 			try:
 				prov = get_provider(provider)
 				models = prov.list_models()
-				for m in models:
-					print(f"  - {m}")
+				for i, m in enumerate(models, 1):
+					print(Colors.dim(f"  {i}. {m}"))
 			except Exception as e:
-				print(f"  [Error fetching models: {e}]")
-		val = input(f"{provider}.{k} [{provider_items[k]}]: ").strip()
+				print(Colors.error(f"  [Error fetching models: {e}]"))
+		
+		current_val = provider_items[k]
+		val = input(Colors.dim(f"{provider}.{k} [{current_val}]: ")).strip()
 		if val:
 			settings.set_provider_option(k, val, provider)
-	print("Settings updated.")
+			print(Colors.success(f"✅ Updated {provider}.{k} = {val}"))
+	
+	print(Colors.success("🎉 Settings updated successfully!"))
 
 def main():
 	import argparse
@@ -50,11 +59,11 @@ def main():
 	if args.set:
 		k, v = args.set
 		settings.set(k, v)
-		print(f"Set {k} = {v}")
+		print(Colors.success(f"✅ Set {k} = {v}"))
 	if args.set_provider:
 		provider, k, v = args.set_provider
 		settings.set_provider_option(k, v, provider)
-		print(f"Set [{provider}].{k} = {v}")
+		print(Colors.success(f"✅ Set [{provider}].{k} = {v}"))
 
 if __name__ == "__main__":
 	main()

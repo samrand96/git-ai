@@ -20,7 +20,7 @@ class OllamaProvider(ProviderBase):
 			"prompt": prompt,
 			**kwargs
 		}
-		resp = requests.post(url, json=payload, timeout=60)
+		resp = requests.post(url, json=payload, timeout=1000)
 		resp.raise_for_status()
 		# Ollama streams responses, but for simplicity, get the first chunk
 		for line in resp.iter_lines():
