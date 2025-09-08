@@ -1,11 +1,12 @@
 # Centralized argument parser for git-ai main CLI
 import argparse
-from cli.commands import commit_main, config_main, list_models_main
+from cli.commands import commit_main, config_main, list_models_main, review_main
 
 COMMANDS = {
     'commit': commit_main,
     'config': config_main,
     'list-models': list_models_main,
+    'review': review_main,
 }
 
 def get_main_parser():

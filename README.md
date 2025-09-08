@@ -1,22 +1,22 @@
 # Git-AI: Your Friendly AI-Powered Commit Companion
 
-Git-AI transforms your staged changes into clear, human-sounding Git commit messages—powered by LLMs (OpenAI, Ollama, Anthropic, and more). It handles staging, message generation, inline review, committing, and pushing, so you can focus entirely on code. The new architecture is provider-agnostic, modular, and fully extensible.
+Git-AI transforms your staged changes into clear, human-sounding Git commit messages—powered by LLMs (OpenAI, Ollama, Anthropic, and more). It also provides comprehensive AI-powered code review with professional reports and colored CLI output. The tool handles staging, message generation, code review, inline editing, committing, and pushing, so you can focus entirely on code. The new architecture is provider-agnostic, modular, and fully extensible.
 
 ---
 
 ## Table of Contents
-
 
 1. [Prerequisites](#prerequisites)
 2. [Installation](#installation)
 3. [Configuration](#configuration)
 4. [Usage](#usage)
    * [Generating a Commit](#generating-a-commit)
+   * [AI Code Review](#ai-code-review)
    * [Listing Models](#listing-models)
    * [Changing Format](#changing-format)
    * [Editing Configuration](#editing-configuration)
    * [Switching Providers](#switching-providers)
-5. [Cross-Platform Build Scripts](#advanced-standalone-binary)
+5. [Cross-Platform Build Scripts](#cross-platform-build-scripts)
 6. [Advanced: Standalone Binary (DIY)](#advanced-standalone-binary)
 7. [To-Do / Future Plans](#to-do--future-plans)
 8. [License](#license)
@@ -115,6 +115,88 @@ python main.py config --set-provider ollama MODEL llama3
    * Commit the message.
    * Prompt: **Push changes?** `[Y/n]`.
 
+### AI Code Review
+
+Git-AI now includes a comprehensive AI-powered code review feature that analyzes your changes and provides professional feedback with colored CLI output or beautiful HTML reports.
+
+#### Basic Usage
+
+```bash
+python main.py review
+```
+
+By default, this reviews **all changes** (both staged and unstaged) with a comprehensive analysis covering logic, security, performance, code quality, documentation, and style.
+
+#### Review Options
+
+**Choose what changes to review:**
+```bash
+python main.py review --changes staged        # Only git add'ed files
+python main.py review --changes unstaged      # Only modified files  
+python main.py review --changes all           # Both staged + unstaged (default)
+python main.py review --changes last-commit   # Previous commit
+```
+
+**Focus on specific review types:**
+```bash
+python main.py review --type logical          # Logic and correctness only
+python main.py review --type security         # Security vulnerabilities only
+python main.py review --type performance      # Performance issues only
+python main.py review --type style            # Code style and standards only
+python main.py review --type documentation    # Documentation completeness only
+python main.py review --type all              # Comprehensive review (default)
+```
+
+**Control severity level:**
+```bash
+python main.py review --severity critical     # Only critical issues
+python main.py review --severity high         # High and critical issues
+python main.py review --severity medium       # Medium, high, and critical (default)
+python main.py review --severity low          # All issues including low priority
+```
+
+#### HTML Reports
+
+Generate beautiful, professional HTML reports perfect for sharing with your team or including in PR reviews:
+
+```bash
+python main.py review --html                           # Generate HTML report
+python main.py review --html --output my_review.html   # Custom filename
+python main.py review --type security --html           # Security-focused HTML report
+```
+
+The AI generates a complete HTML document with:
+- Modern responsive design with professional styling
+- Color-coded severity levels and interactive table of contents
+- Code syntax highlighting and detailed findings with file/line references
+- Executive summary with metrics and actionable recommendations
+- Security risk matrix and performance impact analysis
+- Compliance checklist for best practices
+
+#### CLI Features
+
+The CLI output includes smart color formatting:
+- 🔴 **Red**: Critical errors, vulnerabilities, dangerous patterns
+- 🟡 **Yellow**: Warnings, potential issues, suggestions
+- 🟢 **Green**: Good practices, correct implementations
+- 🔵 **Cyan**: Section headers and information
+- ⚪ **White**: General findings and bullet points
+
+#### Examples
+
+```bash
+# Quick security check of your current changes
+python main.py review --type security
+
+# Comprehensive HTML report for code review meeting
+python main.py review --html --output "sprint_review.html"
+
+# Check only critical issues in staged files
+python main.py review --changes staged --severity critical
+
+# Performance analysis of your last commit
+python main.py review --changes last-commit --type performance
+```
 
 ### Listing Models
 
@@ -217,6 +299,7 @@ If you’d rather run `git-ai` without Python installed at runtime:
 
 ## To-Do / Future Plans
 
+- [x] **AI Code Review**: Professional code analysis with CLI colors and HTML reports - supports multiple review types, severity levels, and change scopes.
 - [ ] Support for Conventional Commits: automatically enforce and generate messages in the `type(scope): description` format (feat, fix, docs, etc.).
 - [ ] Pre-commit and commit-msg hooks: integrate Git hooks to validate or reformat the AI-generated commit before it’s saved.
 - [ ] Issue tracker integration: detect and link JIRA, GitHub, or GitLab issue IDs to commits, and fetch issue titles for context.

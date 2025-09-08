@@ -1,4 +1,3 @@
-# Main entry point for git-ai CLI
 import sys
 from cli.parser import get_main_parser, COMMANDS
 
