@@ -5,6 +5,7 @@ from .anthropic_provider import AnthropicProvider
 from .ollama_provider import OllamaProvider
 from .gemini_provider import GeminiProvider
 from .lmstudio_provider import LMStudioProvider
+from .groq_provider import GroqProvider
 
 _PROVIDER_MAP = {
 	'openai': OpenAIProvider,
@@ -12,6 +13,7 @@ _PROVIDER_MAP = {
 	'ollama': OllamaProvider,
     'gemini': GeminiProvider,
     'lmstudio': LMStudioProvider,
+    'groq': GroqProvider
 }
 
 def get_provider(name: str, **kwargs) -> ProviderBase:

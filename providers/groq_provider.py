@@ -2,12 +2,12 @@ from .base import ProviderBase
 from core.config import settings
 import openai
 
-class OpenAIProvider(ProviderBase):
+class GroqProvider(ProviderBase):
 	def __init__(self, api_key: str = None, model: str = None, **kwargs):
-		# Prefer explicit args, then provider config, then fallback
-		self.api_key = api_key or settings.get_provider_option('API_KEY', 'openai', '')
-		self.model = model or settings.get_provider_option('MODEL', 'openai', 'gpt-4o-mini')
-		self.client = openai.OpenAI(api_key=self.api_key)
+
+		self.api_key = api_key or settings.get_provider_option('API_KEY', 'groq', None)
+		self.model = model or settings.get_provider_option('MODEL', 'groq', 'openai/gpt-oss-120b')
+		self.client = openai.OpenAI(base_url="https://api.groq.com/openai/v1", api_key=self.api_key)
 
 	def generate(self, prompt: str, **kwargs):
 		messages = kwargs.get('messages')

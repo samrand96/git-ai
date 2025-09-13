@@ -39,7 +39,11 @@ class Settings:
 		'lmstudio': {
             'HOST': 'http://localhost:1234',
 			'MODEL': 'gemma-3-1b-it-qat',
-        }
+        },
+        'groq': {
+            'API_KEY': '',
+            'MODEL': 'openai/gpt-oss-120b',
+        },
 	}
 
 	@classmethod
@@ -65,6 +69,7 @@ class Settings:
 			'anthropic': ['API_KEY', 'MODEL'],
 			'gemini': ['API_KEY', 'MODEL'],
 			'lmstudio': ['HOST', 'MODEL'],
+            'groq': ['API_KEY', 'MODEL'],
 		}
 		section = provider.upper()
 		if section not in parser:
