@@ -44,6 +44,10 @@ class Settings:
             'API_KEY': '',
             'MODEL': 'openai/gpt-oss-120b',
         },
+        'deepseek': {
+            'API_KEY': '',
+            'MODEL': 'deepseek-chat',
+        },
 	}
 
 	@classmethod

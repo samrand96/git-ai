@@ -6,6 +6,7 @@ from .ollama_provider import OllamaProvider
 from .gemini_provider import GeminiProvider
 from .lmstudio_provider import LMStudioProvider
 from .groq_provider import GroqProvider
+from .deepseek_provider import DeepseekProvider
 
 _PROVIDER_MAP = {
 	'openai': OpenAIProvider,
@@ -13,7 +14,8 @@ _PROVIDER_MAP = {
 	'ollama': OllamaProvider,
     'gemini': GeminiProvider,
     'lmstudio': LMStudioProvider,
-    'groq': GroqProvider
+    'groq': GroqProvider,
+    'deepseek': DeepseekProvider,
 }
 
 def get_provider(name: str, **kwargs) -> ProviderBase:
