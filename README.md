@@ -15,8 +15,8 @@ Git-AI is a professional, provider-agnostic CLI that turns your staged Git chang
 
 ### From Source
 ```bash
-git clone https://github.com/ivashchenko96/git-artificial-intelligent.git
-cd git-artificial-intelligent
+git clone https://github.com/samrand96/git-ai.git
+cd git-ai
 cargo build --release
 ```
 
@@ -177,6 +177,6 @@ Artifacts are packaged per target and attached to the GitHub release.
 - [ ] Template configuration: allow users to define custom commit templates with optional footers or co-author tags.
 - [ ] Multi-language support: enable commit messages in different languages based on project locale or user preference.
 
---
+
 ## License
 MIT. See [LICENSE](LICENSE).
