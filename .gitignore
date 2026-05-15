@@ -1,0 +1,16 @@
+target/
+
+# IDEs
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+
+# Environment files
+.env
+*.env
+
+# Release artifacts
+dist/
+build/
